@@ -190,6 +190,3 @@ jobs:
             sys-info.deb \
             --title "Release ${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }}" \
             --notes "Automatically generated release for ${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }}"
-  test:
-    # if: startsWith(github.ref, 'refs/tags/')  # Ensures this job runs only for tags
-    uses: ./.github/workflows/package.yml
