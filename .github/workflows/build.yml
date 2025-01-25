@@ -1,28 +1,45 @@
+# Workflow Name: Build-Deb
+# This workflow is a comprehensive automation pipeline designed to build and test the sys-info application.
+# The process begins when changes are pushed to the main branch, ensuring the codebase is always tested and validated.
+# It has two key jobs: the "build" job, responsible for compiling and preparing artifacts, and the "test" job, which verifies the functionality of the application.
+
 name: Build-Deb
 
 on:
+  # Event Trigger: Pushes to the main branch
+  # Each time a commit is pushed to the main branch, this workflow initiates.
   push:
     branches:
       - main
 
 jobs:
   build:
+    # The "build" job takes place in a clean Ubuntu 24.04 environment.
+    # Its goal is to compile the sys-info application and prepare it for testing.
     runs-on: ubuntu-24.04
     outputs:
+      # Outputs allow the build job to pass key information—such as the latest Git tag, build date, and architecture—to other jobs.
       GIT_TAG: ${{ steps.get-latest-tag.outputs.GIT_TAG }}
       BUILD_DATE: ${{ steps.variables.outputs.BUILD_DATE }}
       ARCH: ${{ steps.variables.outputs.ARCH }}
     steps:
       - name: Checkout code
+        # This step ensures that the latest version of the code from the repository is available for the workflow.
         uses: actions/checkout@v4
 
       - name: Install build dependencies
+        # The system is prepared for compilation by installing essential tools such as GCC and build-essential.
+        # Without these tools, the sys-info application cannot be compiled.
         run: sudo apt-get update && sudo apt-get install -y build-essential gcc
 
       - name: Build the project
+        # Here, the sys-info application is compiled using GCC.
+        # This transforms the C source code (src/sys-info.c) into an executable binary named "sys-info."
         run: gcc -o sys-info src/sys-info.c
 
       - name: Get latest tag
+        # Git tags are markers that indicate specific releases or versions of the codebase.
+        # This step fetches all tags, identifies the latest semantic version (e.g., 1.0.0), and outputs it for use in subsequent steps.
         id: get-latest-tag
         run: |
           git fetch --tags
@@ -31,19 +48,24 @@ jobs:
           echo "GIT_TAG=$GIT_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Get build variables
+        # Build metadata is crucial for traceability and reproducibility.
+        # This step generates the current timestamp as BUILD_DATE and assigns a static architecture value ("all").
+        # The variables are stored in GITHUB_OUTPUT for downstream usage and a file named VARS_FILE for artifact storage.
         id: variables
         run: |
           BUILD_DATE=$(date +"%Y%m%d%H%M%S")
           ARCH=all
           echo "BUILD_DATE: $BUILD_DATE"
           echo "ARCH: $ARCH"
-          # GITHUB_OUTPUT is a file that will be used to pass the variables to the next job
           echo "BUILD_DATE=$BUILD_DATE" >> "$GITHUB_OUTPUT"
           echo "ARCH=$ARCH" >> "$GITHUB_OUTPUT"
           echo "BUILD_DATE=$BUILD_DATE" > VARS_FILE
           echo "ARCH=$ARCH" >> VARS_FILE
 
       - name: create sys-info artifact
+        # Artifacts are files or data produced by a job that can be shared or downloaded.
+        # This step uploads the compiled sys-info application and the build metadata file (VARS_FILE).
+        # Retention is set to 5 days to ensure the artifacts remain accessible for a reasonable duration.
         uses: actions/upload-artifact@v4
         with:
           name: sys-info
@@ -53,22 +75,29 @@ jobs:
           retention-days: 5
 
   test:
+    # The "test" job is responsible for ensuring the sys-info application functions as expected.
+    # It relies on the "build" job to provide the compiled application as an input.
     runs-on: ubuntu-24.04
     needs: build
     steps:
       - name: Download sys_info build
+        # This step retrieves the sys-info artifact uploaded during the build job.
+        # The artifact includes both the compiled binary and build metadata.
         uses: actions/download-artifact@v4
         with:
           name: sys-info
 
       - name: Permissions
+        # After downloading, the sys-info binary must be made executable.
+        # This ensures the system can run the binary during testing.
         run: chmod +x sys-info
 
       - name: Test execution
+        # The sys-info application is executed, and its output is captured.
+        # The script verifies the output to ensure the application provides the expected functionality.
+        # For example, it checks whether the output includes the phrase "SysInfo package."
         run: |
           OUTPUT=$(./sys-info)
-
-          # Check for specific output patterns
           if echo "$OUTPUT" | grep -q "SysInfo package"; then
               echo "Test 1 passed: Program displays package information."
           else
