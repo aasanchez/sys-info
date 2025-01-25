@@ -105,4 +105,5 @@ jobs:
           fi
 
   package:
+    needs: build
     uses: ./.github/workflows/package.yml
