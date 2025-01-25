@@ -103,3 +103,6 @@ jobs:
           else
               echo "Test 1 failed: Package information is missing."
           fi
+
+  package:
+    uses: ./.github/workflows/package.yml
