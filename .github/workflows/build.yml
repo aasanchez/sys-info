@@ -105,5 +105,9 @@ jobs:
           fi
 
   package:
-    needs: test
-    uses: ./.github/workflows/package.yml
+    needs: [ build, test ]
+    uses: ./.github/workflows/_package.yml
+    with:
+      GIT_TAG: ${{ needs.build.outputs.GIT_TAG }}
+      BUILD_DATE: ${{ needs.build.outputs.BUILD_DATE }}
+      ARCH: ${{ needs.build.outputs.ARCH }}
