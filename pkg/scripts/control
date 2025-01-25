@@ -1,0 +1,6 @@
+Package: sys-info
+Version: <VERSION>
+Maintainer: Alexis Sanchez <mail@aasanchez.me>
+Architecture: <ARCH>
+Homepage: https://aasanchez.me
+Description: Just a demo package, about how to build in github actions linux pkgs

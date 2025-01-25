@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+export NORMAL='\033[0m'
+export GREEN='\033[1;32m'
+
+echo -e "${GREEN}Pre Install Script${NORMAL}"

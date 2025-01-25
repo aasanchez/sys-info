@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+export NORMAL='\033[0m'
+export YELLOW='\033[1;33m'
+
+echo -e "${YELLOW}Post removal Script${NORMAL}"
+

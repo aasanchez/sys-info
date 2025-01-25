@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+export NORMAL='\033[0m'
+export BLUE='\033[1;34m'
+
+echo -e "${BLUE}Post Install Script${NORMAL}"
+
+chmod 755 /usr/bin/sys-info

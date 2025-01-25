@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+export NORMAL='\033[0m'
+export RED='\033[1;31m'
+
+echo -e "${RED}Pre Removal Script${NORMAL}"
