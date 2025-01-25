@@ -1,6 +1,6 @@
 # Sys_info Package
 
-[![Build-Deb](https://github.com/aasanchez/sys_info/actions/workflows/build-deb.yml/badge.svg?branch=master)](https://github.com/aasanchez/sys_info/actions/workflows/build-deb.yml)
+[![Build-Deb](https://github.com/aasanchez/sys-info/actions/workflows/build.yml/badge.svg)](https://github.com/aasanchez/sys-info/actions/workflows/build.yml)
 
 A simple C program that displays system information and version details.
 
