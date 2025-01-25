@@ -6,71 +6,6 @@ on:
       - master
 
 jobs:
-  build:
-    runs-on: ubuntu-24.04
-    outputs:
-      GIT_TAG: ${{ steps.get-latest-tag.outputs.GIT_TAG }}
-      BUILD_DATE: ${{ steps.variables.outputs.BUILD_DATE }}
-      ARCH: ${{ steps.variables.outputs.ARCH }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install build dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential gcc
-
-      - name: Build the project
-        run: gcc -o sys-info src/sys-info.c
-
-      - name: Get latest tag
-        id: get-latest-tag
-        run: |
-          git fetch --tags
-          GIT_TAG=$(git tag -l | grep -E "^[0-9]+\.[0-9]+\.[0-9]+$" | sort -V | tail -n 1)
-          echo "GIT_TAG=$GIT_TAG"
-          echo "GIT_TAG=$GIT_TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Get build variables
-        id: variables
-        run: |
-          BUILD_DATE=$(date +"%Y%m%d%H%M%S")
-          ARCH=all
-          echo "BUILD_DATE: $BUILD_DATE"
-          echo "ARCH: $ARCH"
-          # GITHUB_OUTPUT is a file that will be used to pass the variables to the next job
-          echo "BUILD_DATE=$BUILD_DATE" >> "$GITHUB_OUTPUT"
-          echo "ARCH=$ARCH" >> "$GITHUB_OUTPUT"
-
-      - name: create sys-info artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sys-info
-          path: sys-info
-          retention-days: 5
-
-  test:
-    runs-on: ubuntu-24.04
-    needs: build
-    steps:
-      - name: Download sys_info build
-        uses: actions/download-artifact@v4
-        with:
-          name: sys-info
-
-      - name: Permissions
-        run: chmod +x sys-info
-
-      - name: Test execution
-        run: |
-          OUTPUT=$(./sys-info)
-
-          # Check for specific output patterns
-          if echo "$OUTPUT" | grep -q "SysInfo package"; then
-              echo "Test 1 passed: Program displays package information."
-          else
-              echo "Test 1 failed: Package information is missing."
-          fi
-
   package-build:
     runs-on: ubuntu-24.04
     needs: [ test, build ]
@@ -255,3 +190,6 @@ jobs:
             sys-info.deb \
             --title "Release ${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }}" \
             --notes "Automatically generated release for ${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }}"
+  test:
+    # if: startsWith(github.ref, 'refs/tags/')  # Ensures this job runs only for tags
+    uses: .github/workflows/package.yml
