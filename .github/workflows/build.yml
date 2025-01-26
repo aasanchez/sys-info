@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       # Outputs allow the build job to pass key information—such as the latest Git tag, build date, and architecture—to other jobs.
-      GIT_TAG: ${{ steps.get-latest-tag.outputs.GIT_TAG }}
+      VERSION: ${{ steps.get-latest-tag.outputs.VERSION }}
       BUILD_DATE: ${{ steps.variables.outputs.BUILD_DATE }}
       ARCH: ${{ steps.variables.outputs.ARCH }}
     steps:
@@ -45,9 +45,9 @@ jobs:
         id: get-latest-tag
         run: |
           git fetch --tags
-          GIT_TAG=$(git tag -l | grep -E "^[0-9]+\.[0-9]+\.[0-9]+$" | sort -V | tail -n 1)
-          echo "GIT_TAG=$GIT_TAG"
-          echo "GIT_TAG=$GIT_TAG" >> "$GITHUB_OUTPUT"
+          VERSION=$(awk 'NF {print; exit}' VERSION)
+          echo "VERSION=$VERSION"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Get build variables
         # Build metadata is crucial for traceability and reproducibility.
@@ -122,43 +122,43 @@ jobs:
 
       - name: Set binary location
         run: |
-          mkdir -p pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin
-          cp -r sys-info pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin
-          sudo chmod 755 pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin/sys-info
+          mkdir -p pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin
+          cp -r sys-info pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin
+          sudo chmod 755 pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin/sys-info
           tree
 
       - name: DEBIAN control and postinst files
         run: |
           # Debian package structure
-          mkdir -p pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN
-          cp pkg/scripts/control  pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
-          sed -i "s/<VERSION>/"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"/g" pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
-          sed -i "s/<ARCH>/"${{ needs.build.outputs.ARCH }}"/g" pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
+          mkdir -p pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN
+          cp pkg/scripts/control  pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
+          sed -i "s/<VERSION>/"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"/g" pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
+          sed -i "s/<ARCH>/"${{ needs.build.outputs.ARCH }}"/g" pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
 
           # Pre installation script
-          cp pkg/scripts/preinst pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/preinst
-          chmod 755 pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/preinst
+          cp pkg/scripts/preinst pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/preinst
+          chmod 755 pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/preinst
 
           # Post installation script
-          cp pkg/scripts/postinst pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postinst
-          chmod 755 pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postinst
+          cp pkg/scripts/postinst pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postinst
+          chmod 755 pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postinst
 
           # Pre Removal script
-          cp pkg/scripts/prerm pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/prerm
-          chmod 755 pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/prerm
+          cp pkg/scripts/prerm pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/prerm
+          chmod 755 pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/prerm
 
           # Post Removal script
-          cp pkg/scripts/postrm pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postrm
-          chmod 755 pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postrm
+          cp pkg/scripts/postrm pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postrm
+          chmod 755 pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postrm
 
       - name: Build DEB package
         run: |
           cd pkg
-          dpkg --build sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"
+          dpkg --build sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"
 
       - name: relocate artifact
         run: |
-          mv pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}".deb sys-info.deb
+          mv pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}".deb sys-info.deb
           ls -la sys-info.deb
 
       - name: Debian Package artifact
@@ -256,13 +256,13 @@ jobs:
       - name: Get SHA for Source Tag
         id: get_sha
         run: |
-          SOURCE_TAG="${{ needs.build.outputs.GIT_TAG }}"
+          SOURCE_TAG="${{ needs.build.outputs.VERSION }}"
           SOURCE_SHA=$(gh api repos/${{ github.repository }}/git/ref/tags/$SOURCE_TAG --jq '.object.sha')
           echo "SOURCE_SHA=$SOURCE_SHA" >> $GITHUB_ENV
 
       - name: Create New Tag
         run: |
-          NEW_TAG="${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }}"
+          NEW_TAG="${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}"
           gh api repos/${{ github.repository }}/git/refs \
             -X POST \
             -F ref="refs/tags/$NEW_TAG" \
@@ -285,7 +285,7 @@ jobs:
 
       - name: Create Release
         run: |
-          gh release create ${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }} \
+          gh release create ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }} \
             sys-info.deb \
-            --title "Release ${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }}" \
-            --notes "Automatically generated release for ${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }}"
+            --title "Release ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}" \
+            --notes "Automatically generated release for ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}"
