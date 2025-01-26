@@ -123,4 +123,5 @@ jobs:
           git push origin --tags
 
   test-code:
+    needs: bump-version
     uses: ./.github/workflows/build.yml
