@@ -92,5 +92,5 @@ jobs:
       # This ensures that the new version is committed and tagged in the repository.
       - name: Push
         run: |
-          git push origin master
+          git push origin main
           git push origin --tags
