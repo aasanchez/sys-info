@@ -90,13 +90,11 @@ jobs:
       # Updates the version string in "src/sys-info.c" and commits the changes.
       - name: Set new version
         run: |
+          echo "NEW_VERSION: $NEW_VERSION"
           sed -i "s/^\(.*Version:.*\)$/  printf(\"${NEW_VERSION}\");/" src/sys-info.c
-
-      # Step 8: Update version file.
-      - name: Set new version
-        run: |
-          echo "${NEW_VERSION}"
           echo "${NEW_VERSION}" >VERSION
+          cat src/sys-info.c
+          cat VERSION
 
       # Step 8: Push changes
       - name: Push changes
