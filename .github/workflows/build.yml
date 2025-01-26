@@ -1,45 +1,35 @@
-# Workflow Name: Build-Deb
-# This workflow is a comprehensive automation pipeline designed to build and test the sys-info application.
-# The process begins when changes are pushed to the main branch, ensuring the codebase is always tested and validated.
-# It has two key jobs: the "build" job, responsible for compiling and preparing artifacts, and the "test" job, which verifies the functionality of the application.
-
 name: Build-Deb
 
 on:
-  # Event Trigger: Pushes to the main branch
-  # Each time a commit is pushed to the main branch, this workflow initiates.
+  workflow_call:
   push:
     branches:
       - main
 
 jobs:
+  env:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: env
+        run: env
+
   build:
-    # The "build" job takes place in a clean Ubuntu 24.04 environment.
-    # Its goal is to compile the sys-info application and prepare it for testing.
     runs-on: ubuntu-24.04
     outputs:
-      # Outputs allow the build job to pass key information—such as the latest Git tag, build date, and architecture—to other jobs.
       VERSION: ${{ steps.version.outputs.VERSION }}
       BUILD_DATE: ${{ steps.variables.outputs.BUILD_DATE }}
       ARCH: ${{ steps.variables.outputs.ARCH }}
     steps:
       - name: Checkout code
-        # This step ensures that the latest version of the code from the repository is available for the workflow.
         uses: actions/checkout@v4
 
       - name: Install build dependencies
-        # The system is prepared for compilation by installing essential tools such as GCC and build-essential.
-        # Without these tools, the sys-info application cannot be compiled.
         run: sudo apt-get update && sudo apt-get install -y build-essential gcc
 
       - name: Build the project
-        # Here, the sys-info application is compiled using GCC.
-        # This transforms the C source code (src/sys-info.c) into an executable binary named "sys-info."
         run: gcc -o sys-info src/sys-info.c
 
       - name: Get current version
-        # Git tags are markers that indicate specific releases or versions of the codebase.
-        # This step fetches all tags, identifies the latest semantic version (e.g., 1.0.0), and outputs it for use in subsequent steps.
         id: version
         run: |
           VERSION=$(awk 'NF {print; exit}' VERSION)
@@ -286,3 +276,6 @@ jobs:
             sys-info.deb \
             --title "Release ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}" \
             --notes "Automatically generated release for ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}"
+
+  test-code:
+    uses: ./.github/workflows/build.yml
