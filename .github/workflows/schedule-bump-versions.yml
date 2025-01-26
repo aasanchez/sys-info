@@ -121,3 +121,6 @@ jobs:
         run: |
           git push origin main
           git push origin --tags
+
+  test-code:
+    uses: ./.github/workflows/build.yml

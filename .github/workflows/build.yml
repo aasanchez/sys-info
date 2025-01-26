@@ -276,6 +276,3 @@ jobs:
             sys-info.deb \
             --title "Release ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}" \
             --notes "Automatically generated release for ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}"
-
-  test-code:
-    uses: ./.github/workflows/build.yml
