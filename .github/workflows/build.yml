@@ -6,7 +6,6 @@
 name: Build-Deb
 
 on:
-  workflow_dispatch:
   # Event Trigger: Pushes to the main branch
   # Each time a commit is pushed to the main branch, this workflow initiates.
   push:
