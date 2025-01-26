@@ -12,9 +12,6 @@ name: Automatic Version Bumper
 # - "2 2 2 * *": Monthly on the 2nd day at 2:02 AM (UTC) to increment the minor version.
 # - "2 2 2 */2 *": Every two months on the 2nd day at 2:02 AM (UTC) to increment the major version.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
   schedule:
     - cron: "2 2 * * *"       # Daily: Increment patch version
@@ -120,9 +117,9 @@ jobs:
           git commit -m "Upgrading version to: $VERSION from $CURRENT_VERSION"
           git tag "$VERSION" -m "Bump to $VERSION"
 
-      # # Step 9: Push the changes and tags to the remote repository.
-      # # This ensures that the new version is committed and tagged in the repository.
-      # - name: Push
-      #   run: |
-      #     git push origin main
-      #     git push origin --tags
+      # Step 9: Push the changes and tags to the remote repository.
+      # This ensures that the new version is committed and tagged in the repository.
+      - name: Push
+        run: |
+          git push origin main
+          git push origin --tags
