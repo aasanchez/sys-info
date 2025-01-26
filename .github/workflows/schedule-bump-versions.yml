@@ -107,8 +107,6 @@ jobs:
         run: |
           sed -i "s/^\(.*Version:.*\)$/  printf(\"${NEW_VERSION}\");/" src/sys-info.c
           echo "${VERSION}" >VERSION
-          cat src/sys-info.c
-          cat VERSION
 
       # Step 8: Push changes
       - name: Push changes
