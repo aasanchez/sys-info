@@ -96,7 +96,7 @@ jobs:
       - name: Push changes
         run: |
           git add .
-          git commit -m "Upgrading version to: $VERSION"
+          git commit -m "Upgrading version to: $VERSION from $CURRENT_VERSION"
           git tag "$VERSION" -m "Bump to $VERSION"
 
       # Step 9: Push the changes and tags to the remote repository.
