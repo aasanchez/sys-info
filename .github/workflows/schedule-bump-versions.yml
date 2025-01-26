@@ -12,6 +12,9 @@ name: Automatic Version Bumper
 # - "2 2 2 * *": Monthly on the 2nd day at 2:02 AM (UTC) to increment the minor version.
 # - "2 2 2 */2 *": Every two months on the 2nd day at 2:02 AM (UTC) to increment the major version.
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
   schedule:
     - cron: "2 2 * * *"       # Daily: Increment patch version
@@ -90,7 +93,8 @@ jobs:
       # Step 8: Update version file.
       - name: Set new version
         run: |
-          echo "${NEW_VERSION}" >VERSION"
+          echo "${NEW_VERSION}"
+          echo "${NEW_VERSION}" >VERSION
 
       # Step 8: Push changes
       - name: Push changes
