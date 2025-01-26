@@ -73,12 +73,10 @@ jobs:
             sys-info
             VARS_FILE
           retention-days: 5
-
   test:
     # The "test" job is responsible for ensuring the sys-info application functions as expected.
     # It relies on the "build" job to provide the compiled application as an input.
     runs-on: ubuntu-24.04
-    needs: build
     steps:
       - name: Download sys_info build
         # This step retrieves the sys-info artifact uploaded during the build job.
@@ -104,10 +102,130 @@ jobs:
               echo "Test 1 failed: Package information is missing."
           fi
 
-  package:
+  package-build:
+    runs-on: ubuntu-24.04
     needs: [ build, test ]
-    uses: ./.github/workflows/_package.yml
-    with:
-      GIT_TAG: ${{ needs.build.outputs.GIT_TAG }}
-      BUILD_DATE: ${{ needs.build.outputs.BUILD_DATE }}
-      ARCH: ${{ needs.build.outputs.ARCH }}
+    steps:
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential dpkg-dev gpg tree
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download sys_info build
+        uses: actions/download-artifact@v4
+        with:
+          name: sys-info
+
+      - name: Set binary location
+        run: |
+          mkdir -p pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin
+          cp -r sys-info pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin
+          sudo chmod 755 pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin/sys-info
+          tree
+
+      - name: DEBIAN control and postinst files
+        run: |
+          # Debian package structure
+          mkdir -p pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN
+          cp pkg/scripts/control  pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
+          sed -i "s/<VERSION>/"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"/g" pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
+          sed -i "s/<ARCH>/"${{ needs.build.outputs.ARCH }}"/g" pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
+
+          # Pre installation script
+          cp pkg/scripts/preinst pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/preinst
+          chmod 755 pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/preinst
+
+          # Post installation script
+          cp pkg/scripts/postinst pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postinst
+          chmod 755 pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postinst
+
+          # Pre Removal script
+          cp pkg/scripts/prerm pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/prerm
+          chmod 755 pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/prerm
+
+          # Post Removal script
+          cp pkg/scripts/postrm pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postrm
+          chmod 755 pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postrm
+
+      - name: Build DEB package
+        run: |
+          cd pkg
+          dpkg --build sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"
+
+      - name: relocate artifact
+        run: |
+          mv pkg/sys-info_"${{ needs.build.outputs.GIT_TAG }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}".deb sys-info.deb
+          ls -la sys-info.deb
+
+      - name: Debian Package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sys-info.deb
+          path: sys-info.deb
+          retention-days: 5
+
+  package-test_get-content:
+    runs-on: ubuntu-24.04
+    needs: package-build
+    steps:
+      - name: Download debian-pkg build
+        uses: actions/download-artifact@v4
+        with:
+          name: sys-info.deb
+
+      - name: dpkg-deb --contents
+        run: dpkg-deb --contents sys-info.deb
+
+  package-test_installation:
+    needs: package-build
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        container:
+          - "ubuntu:24.04"
+          - "debian:12"
+    container:
+      image: ${{ matrix.container }}
+    steps:
+      - name: Install dependencies
+        run: apt-get update
+
+      - name: Download debian package
+        uses: actions/download-artifact@v4
+        with:
+          name: sys-info.deb
+
+      - name: System Information
+        run: |
+          echo "--- OS Release ---"
+          cat /etc/os-release
+          echo "--- Kernel Information ---"
+          uname -a
+
+      - name: Install package
+        run: dpkg -i sys-info.deb
+
+      - name: Package Status
+        run: dpkg -l | grep sys-info
+
+      - name: Verify binary exists and permissions
+        run: ls -la /usr/bin/sys-info
+
+      - name: Verify binary exists
+        run: which sys-info
+
+      - name: Test execution
+        run: sys-info || true
+
+      - name: Remove package
+        run: dpkg -r sys-info
+
+      - name: Verify removal
+        run: |
+          if which sys-info; then
+            echo "Package not properly removed"
+            exit 1
+          fi
+
+
