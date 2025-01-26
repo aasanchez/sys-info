@@ -24,7 +24,7 @@ on:
 # Jobs Section:
 # Defines the steps to be executed as part of the workflow.
 jobs:
-  build:
+  bump-version:
     # Specifies the runner environment as Ubuntu 24.04.
     runs-on: ubuntu-24.04
 
@@ -109,16 +109,16 @@ jobs:
       - name: Set new version
         run: |
           sed -i "s/^\(.*Version:.*\)$/  printf(\"${NEW_VERSION}\");/" src/sys-info.c
-          echo "${NEW_VERSION}" >VERSION
+          echo "${VERSION}" >VERSION
           cat src/sys-info.c
           cat VERSION
 
-      # # Step 8: Push changes
-      # - name: Push changes
-      #   run: |
-      #     git add .
-      #     git commit -m "Upgrading version to: $VERSION from $CURRENT_VERSION"
-      #     git tag "$VERSION" -m "Bump to $VERSION"
+      # Step 8: Push changes
+      - name: Push changes
+        run: |
+          git add .
+          git commit -m "Upgrading version to: $VERSION from $CURRENT_VERSION"
+          git tag "$VERSION" -m "Bump to $VERSION"
 
       # # Step 9: Push the changes and tags to the remote repository.
       # # This ensures that the new version is committed and tagged in the repository.
