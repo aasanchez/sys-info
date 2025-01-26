@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       # Outputs allow the build job to pass key information—such as the latest Git tag, build date, and architecture—to other jobs.
-      VERSION: ${{ steps.get-latest-tag.outputs.VERSION }}
+      VERSION: ${{ steps.version.outputs.VERSION }}
       BUILD_DATE: ${{ steps.variables.outputs.BUILD_DATE }}
       ARCH: ${{ steps.variables.outputs.ARCH }}
     steps:
@@ -39,12 +39,11 @@ jobs:
         # This transforms the C source code (src/sys-info.c) into an executable binary named "sys-info."
         run: gcc -o sys-info src/sys-info.c
 
-      - name: Get latest tag
+      - name: Get current version
         # Git tags are markers that indicate specific releases or versions of the codebase.
         # This step fetches all tags, identifies the latest semantic version (e.g., 1.0.0), and outputs it for use in subsequent steps.
-        id: get-latest-tag
+        id: version
         run: |
-          git fetch --tags
           VERSION=$(awk 'NF {print; exit}' VERSION)
           echo "VERSION=$VERSION"
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
@@ -74,7 +73,7 @@ jobs:
           path: |
             sys-info
             VARS_FILE
-          retention-days: 5
+          retention-days: 1
   test:
     # The "test" job is responsible for ensuring the sys-info application functions as expected.
     # It relies on the "build" job to provide the compiled application as an input.
@@ -100,9 +99,9 @@ jobs:
         run: |
           OUTPUT=$(./sys-info)
           if echo "$OUTPUT" | grep -q "SysInfo package"; then
-              echo "Test 1 passed: Program displays package information."
+            echo "Test 1 passed: Program displays package information."
           else
-              echo "Test 1 failed: Package information is missing."
+            echo "Test 1 failed: Package information is missing."
           fi
 
   package-build:
@@ -166,7 +165,7 @@ jobs:
         with:
           name: sys-info.deb
           path: sys-info.deb
-          retention-days: 5
+          retention-days: 1
 
   package-test_get-info:
     runs-on: ubuntu-24.04
