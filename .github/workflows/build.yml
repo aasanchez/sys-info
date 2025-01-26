@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Install build dependencies
         run: sudo apt-get update && sudo apt-get install -y build-essential gcc
@@ -101,6 +103,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Download sys_info build
         uses: actions/download-artifact@v4
@@ -236,6 +240,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Authenticate GitHub CLI
         run: echo "${{ secrets.PAT }}" | gh auth login --with-token
@@ -261,6 +267,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Download debian package
         uses: actions/download-artifact@v4
