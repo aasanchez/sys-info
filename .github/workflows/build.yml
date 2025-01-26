@@ -77,6 +77,7 @@ jobs:
     # The "test" job is responsible for ensuring the sys-info application functions as expected.
     # It relies on the "build" job to provide the compiled application as an input.
     runs-on: ubuntu-24.04
+    needs: [build]
     steps:
       - name: Download sys_info build
         # This step retrieves the sys-info artifact uploaded during the build job.
