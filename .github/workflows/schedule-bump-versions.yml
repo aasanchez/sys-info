@@ -90,11 +90,14 @@ jobs:
       # Updates the version string in "src/sys-info.c" and commits the changes.
       - name: Set new version
         run: |
-          echo "NEW_VERSION: $NEW_VERSION"
-          sed -i "s/^\(.*Version:.*\)$/  printf(\"${NEW_VERSION}\");/" src/sys-info.c
-          echo "${NEW_VERSION}" >VERSION
-          cat src/sys-info.c
-          cat VERSION
+          env | grep VERSION
+          env | grep CURRENT_VERSION
+          env
+          # echo "NEW_VERSION: $NEW_VERSION"
+          # sed -i "s/^\(.*Version:.*\)$/  printf(\"${NEW_VERSION}\");/" src/sys-info.c
+          # echo "${NEW_VERSION}" >VERSION
+          # cat src/sys-info.c
+          # cat VERSION
 
       # Step 8: Push changes
       - name: Push changes
@@ -103,9 +106,9 @@ jobs:
           git commit -m "Upgrading version to: $VERSION from $CURRENT_VERSION"
           git tag "$VERSION" -m "Bump to $VERSION"
 
-      # Step 9: Push the changes and tags to the remote repository.
-      # This ensures that the new version is committed and tagged in the repository.
-      - name: Push
-        run: |
-          git push origin main
-          git push origin --tags
+      # # Step 9: Push the changes and tags to the remote repository.
+      # # This ensures that the new version is committed and tagged in the repository.
+      # - name: Push
+      #   run: |
+      #     git push origin main
+      #     git push origin --tags
