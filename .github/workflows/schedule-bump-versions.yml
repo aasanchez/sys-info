@@ -51,7 +51,7 @@ jobs:
       # Step 4: Calculate the new patch version.
       # Triggered by the daily schedule ("2 2 * * *").
       - name: Calculate new Patch
-        if: github.event.schedule == '2 2 * * *'
+        if: (github.event.schedule == '2 2 * * *' || github.event_name == 'workflow_dispatch')
         run: |
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
           PATCH=$((PATCH + 1))
