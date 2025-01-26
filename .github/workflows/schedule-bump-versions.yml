@@ -69,40 +69,51 @@ jobs:
           echo "VERSION=${MAJOR}.${MINOR}.${PATCH}" >>$GITHUB_ENV
           echo "VERSION=${MAJOR}.${MINOR}.${PATCH}"
 
-      # # Step 5: Calculate the new minor version.
-      # # Triggered by the monthly schedule ("2 2 2 * *").
-      # - name: Calculate new Minor
-      #   if: github.event.schedule == '2 2 2 * *'
-      #   run: |
-      #     IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-      #     MINOR=$((MINOR + 1))
-      #     NEW_VERSION="Version: ${MAJOR}.${MINOR}.0"
-      #     echo "NEW_VERSION=$NEW_VERSION" >>$GITHUB_ENV
-      #     echo "VERSION=${MAJOR}.${MINOR}.0" >>$GITHUB_ENV
+      # Step 5: Calculate the new minor version.
+      # Triggered by the monthly schedule ("2 2 2 * *").
+      - name: Calculate new Minor
+        if: github.event.schedule == '2 2 2 * *'
+        run: |
+          echo "CURRENT_VERSION: $CURRENT_VERSION"
 
-      # # Step 6: Calculate the new major version.
-      # # Triggered by the bi-monthly schedule ("2 2 2 */2 *").
-      # - name: Calculate new Major
-      #   if: github.event.schedule == '2 2 2 */2 *'
-      #   run: |
-      #     IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-      #     MAJOR=$((MAJOR + 1))
-      #     NEW_VERSION="Version: ${MAJOR}.0.0"
-      #     echo "NEW_VERSION=$NEW_VERSION" >>$GITHUB_ENV
-      #     echo "VERSION=${MAJOR}.0.0" >>$GITHUB_ENV
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          MINOR=$((MINOR + 1))
+          NEW_VERSION="Version: ${MAJOR}.${MINOR}.0"
 
-      # # Step 7: Update the version in the source code.
-      # # Updates the version string in "src/sys-info.c" and commits the changes.
-      # - name: Set new version
-      #   run: |
-      #     env | grep VERSION
-      #     env | grep CURRENT_VERSION
-      #     env
-      #     # echo "NEW_VERSION: $NEW_VERSION"
-      #     # sed -i "s/^\(.*Version:.*\)$/  printf(\"${NEW_VERSION}\");/" src/sys-info.c
-      #     # echo "${NEW_VERSION}" >VERSION
-      #     # cat src/sys-info.c
-      #     # cat VERSION
+          echo "NEW_VERSION=$NEW_VERSION" >>$GITHUB_ENV
+          echo "NEW_VERSION=$NEW_VERSION"
+
+          echo "VERSION=${MAJOR}.${MINOR}.${PATCH}" >>$GITHUB_ENV
+          echo "VERSION=${MAJOR}.${MINOR}.${PATCH}"
+
+      # Step 6: Calculate the new major version.
+      # Triggered by the bi-monthly schedule ("2 2 2 */2 *").
+      - name: Calculate new Major
+        if: github.event.schedule == '2 2 2 */2 *'
+        run: |
+          echo "CURRENT_VERSION: $CURRENT_VERSION"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          MAJOR=$((MAJOR + 1))
+          NEW_VERSION="Version: ${MAJOR}.0.0"
+
+          echo "NEW_VERSION=$NEW_VERSION" >>$GITHUB_ENV
+          echo "NEW_VERSION=$NEW_VERSION"
+
+          echo "VERSION=${MAJOR}.${MINOR}.${PATCH}" >>$GITHUB_ENV
+          echo "VERSION=${MAJOR}.${MINOR}.${PATCH}"
+
+
+      # Step 7: Update the version in the source code.
+      # Updates the version string in "src/sys-info.c" and commits the changes.
+      - name: Set new version
+        run: |
+          env | grep VERSION
+          # echo "NEW_VERSION: $NEW_VERSION"
+          # sed -i "s/^\(.*Version:.*\)$/  printf(\"${NEW_VERSION}\");/" src/sys-info.c
+          # echo "${NEW_VERSION}" >VERSION
+          # cat src/sys-info.c
+          # cat VERSION
 
       # # Step 8: Push changes
       # - name: Push changes
