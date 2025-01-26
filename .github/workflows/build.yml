@@ -246,7 +246,6 @@ jobs:
   create-build-tag:
     runs-on: ubuntu-24.04
     needs: [ package-test_get-content, package-test_get-info, package-test_installation, build ]
-    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -268,3 +267,25 @@ jobs:
             -X POST \
             -F ref="refs/tags/$NEW_TAG" \
             -F sha="$SOURCE_SHA"
+
+  create-release:
+    runs-on: ubuntu-24.04
+    needs: [ create-build-tag, build ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download debian package
+        uses: actions/download-artifact@v4
+        with:
+          name: sys-info.deb
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.PAT }}" | gh auth login --with-token
+
+      - name: Create Release
+        run: |
+          gh release create ${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }} \
+            sys-info.deb \
+            --title "Release ${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }}" \
+            --notes "Automatically generated release for ${{ needs.build.outputs.GIT_TAG }}-${{ needs.build.outputs.BUILD_DATE }}"
