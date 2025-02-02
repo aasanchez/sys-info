@@ -113,43 +113,43 @@ jobs:
 
       - name: Set binary location
         run: |
-          mkdir -p pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin
-          cp -r sys-info pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin
-          sudo chmod 755 pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/usr/bin/sys-info
+          mkdir -p pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/usr/bin
+          cp -r sys-info pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/usr/bin
+          sudo chmod 755 pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/usr/bin/sys-info
           tree
 
       - name: DEBIAN control and postinst files
         run: |
           # Debian package structure
-          mkdir -p pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN
-          cp pkg/scripts/control  pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
-          sed -i "s/<VERSION>/"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"/g" pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
-          sed -i "s/<ARCH>/"${{ needs.build.outputs.ARCH }}"/g" pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/control
+          mkdir -p pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN
+          cp pkg/scripts/control  pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/control
+          sed -i "s/<VERSION>/${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}/g" pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/control
+          sed -i "s/<ARCH>/${{ needs.build.outputs.ARCH }}/g" pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/control
 
           # Pre installation script
-          cp pkg/scripts/preinst pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/preinst
-          chmod 755 pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/preinst
+          cp pkg/scripts/preinst pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/preinst
+          chmod 755 pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/preinst
 
           # Post installation script
-          cp pkg/scripts/postinst pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postinst
-          chmod 755 pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postinst
+          cp pkg/scripts/postinst pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/postinst
+          chmod 755 pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/postinst
 
           # Pre Removal script
-          cp pkg/scripts/prerm pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/prerm
-          chmod 755 pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/prerm
+          cp pkg/scripts/prerm pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/prerm
+          chmod 755 pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/prerm
 
           # Post Removal script
-          cp pkg/scripts/postrm pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postrm
-          chmod 755 pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"/DEBIAN/postrm
+          cp pkg/scripts/postrm pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/postrm
+          chmod 755 pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}/DEBIAN/postrm
 
       - name: Build DEB package
         run: |
           cd pkg
-          dpkg --build sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}"
+          dpkg --build sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}
 
       - name: relocate artifact
         run: |
-          mv pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}".deb sys-info_${{ needs.build.outputs.VERSION }}.deb
+          mv pkg/sys-info_${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}_${{ needs.build.outputs.ARCH }}.deb sys-info_${{ needs.build.outputs.VERSION }}.deb
 
       - name: Debian Package artifact
         uses: actions/upload-artifact@v4
@@ -209,7 +209,7 @@ jobs:
           uname -a
 
       - name: Install package
-        run: dpkg -i sys-info_"${{ needs.build.outputs.VERSION }}"".deb
+        run: dpkg -i sys-info_${{ needs.build.outputs.VERSION }}.deb
 
       - name: Package Status
         run: dpkg -l | grep sys-info
@@ -280,6 +280,6 @@ jobs:
       - name: Create Release
         run: |
           gh release create ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }} \
-            sys-info_"${{ needs.build.outputs.VERSION }}"".deb \
+            sys-info_${{ needs.build.outputs.VERSION }}.deb \
             --title "Release ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}" \
             --notes "Automatically generated release for ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}"
