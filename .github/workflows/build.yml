@@ -149,19 +149,18 @@ jobs:
 
       - name: relocate artifact
         run: |
-          mv pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}".deb sys-info.deb
-          ls -la sys-info.deb
+          mv pkg/sys-info_"${{ needs.build.outputs.VERSION }}"-"${{ needs.build.outputs.BUILD_DATE }}"_"${{ needs.build.outputs.ARCH }}".deb sys-info_${{ needs.build.outputs.VERSION }}.deb
 
       - name: Debian Package artifact
         uses: actions/upload-artifact@v4
         with:
           name: sys-info.deb
-          path: sys-info.deb
+          path: sys-info_${{ needs.build.outputs.VERSION }}.deb
           retention-days: 1
 
   package-test_get-info:
     runs-on: ubuntu-24.04
-    needs: package-build
+    needs: [ build, package-build ]
     steps:
       - name: Download debian-pkg build
         uses: actions/download-artifact@v4
@@ -169,11 +168,11 @@ jobs:
           name: sys-info.deb
 
       - name: dpkg-deb --info
-        run: dpkg-deb --info sys-info.deb
+        run: dpkg-deb --info sys-info_${{ needs.build.outputs.VERSION }}.deb
 
   package-test_get-content:
     runs-on: ubuntu-24.04
-    needs: package-build
+    needs: [ build, package-build ]
     steps:
       - name: Download debian-pkg build
         uses: actions/download-artifact@v4
@@ -181,10 +180,10 @@ jobs:
           name: sys-info.deb
 
       - name: dpkg-deb --contents
-        run: dpkg-deb --contents sys-info.deb
+        run: dpkg-deb --contents sys-info_${{ needs.build.outputs.VERSION }}.deb
 
   package-test_installation:
-    needs: package-build
+    needs: [ build, package-build ]
     runs-on: ubuntu-24.04
     strategy:
       matrix:
@@ -210,7 +209,7 @@ jobs:
           uname -a
 
       - name: Install package
-        run: dpkg -i sys-info.deb
+        run: dpkg -i sys-info_"${{ needs.build.outputs.VERSION }}"".deb
 
       - name: Package Status
         run: dpkg -l | grep sys-info
@@ -281,6 +280,6 @@ jobs:
       - name: Create Release
         run: |
           gh release create ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }} \
-            sys-info.deb \
+            sys-info_"${{ needs.build.outputs.VERSION }}"".deb \
             --title "Release ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}" \
             --notes "Automatically generated release for ${{ needs.build.outputs.VERSION }}-${{ needs.build.outputs.BUILD_DATE }}"
