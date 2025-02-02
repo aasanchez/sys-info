@@ -1,16 +1,4 @@
-# Workflow: Automatic Version Bumper
-# Purpose: This GitHub Actions workflow automatically increments the version of a project
-#          based on a predefined schedule. It supports patch, minor, and major version
-#          increments using a cron-based schedule.
-
-# Workflow Name: Defines the name of the workflow as "Automatic Version Bumper".
 name: Automatic Version Bumper
-
-# Event Triggers:
-# The workflow is triggered on a schedule defined by cron expressions.
-# - "2 2 * * *": Daily at 2:02 AM (UTC) to increment the patch version.
-# - "2 2 2 * *": Monthly on the 2nd day at 2:02 AM (UTC) to increment the minor version.
-# - "2 2 2 */2 *": Every two months on the 2nd day at 2:02 AM (UTC) to increment the major version.
 on:
   workflow_dispatch:
   schedule:
@@ -18,39 +6,25 @@ on:
     - cron: "2 2 2 * *"       # Monthly: Increment minor version
     - cron: "2 2 2 */2 *"     # Bi-monthly: Increment major version
 
-# Jobs Section:
-# Defines the steps to be executed as part of the workflow.
 jobs:
   bump-version:
-    # Specifies the runner environment as Ubuntu 24.04.
     runs-on: ubuntu-24.04
 
     steps:
-      # Step 1: Checkout the code repository.
-      # This uses the GitHub-provided checkout action to fetch the repository.
       - name: Checkout code
         uses: actions/checkout@v4
-
-      # Step 2: Authenticate GitHub CLI for committing and pushing changes.
-      # Configures Git with the provided user name and email, then authenticates using a personal access token (PAT).
       - name: Authenticate GitHub CLI
         run: |
           git config user.name "aasanchez"
           git config user.email "aasanchez@gmail.com"
           echo "${{ secrets.PAT }}" | gh auth login --with-token
-
       - name: Get current version
-        # Git tags are markers that indicate specific releases or versions of the codebase.
-        # This step fetches all tags, identifies the latest semantic version (e.g., 1.0.0), and outputs it for use in subsequent steps.
         id: version
         run: |
           CURRENT_VERSION=$(awk 'NF {print; exit}' VERSION)
 
           echo "CURRENT_VERSION=$CURRENT_VERSION"
           echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
-
-      # Step 4: Calculate the new patch version.
-      # Triggered by the daily schedule ("2 2 * * *").
       - name: Calculate new Patch
         # if: (github.event.schedule == '2 2 * * *' || github.event_name == 'workflow_dispatch')
         run: |
@@ -65,9 +39,6 @@ jobs:
 
           echo "VERSION=${MAJOR}.${MINOR}.${PATCH}" >>$GITHUB_ENV
           echo "VERSION=${MAJOR}.${MINOR}.${PATCH}"
-
-      # Step 5: Calculate the new minor version.
-      # Triggered by the monthly schedule ("2 2 2 * *").
       - name: Calculate new Minor
         if: github.event.schedule == '2 2 2 * *'
         run: |
@@ -82,9 +53,6 @@ jobs:
 
           echo "VERSION=${MAJOR}.${MINOR}.${PATCH}" >>$GITHUB_ENV
           echo "VERSION=${MAJOR}.${MINOR}.${PATCH}"
-
-      # Step 6: Calculate the new major version.
-      # Triggered by the bi-monthly schedule ("2 2 2 */2 *").
       - name: Calculate new Major
         if: github.event.schedule == '2 2 2 */2 *'
         run: |
@@ -99,24 +67,15 @@ jobs:
 
           echo "VERSION=${MAJOR}.${MINOR}.${PATCH}" >>$GITHUB_ENV
           echo "VERSION=${MAJOR}.${MINOR}.${PATCH}"
-
-
-      # Step 7: Update the version in the source code.
-      # Updates the version string in "src/sys-info.c" and commits the changes.
       - name: Set new version
         run: |
           sed -i "s/^\(.*Version:.*\)$/  printf(\"${NEW_VERSION}\");/" src/sys-info.c
           echo "${VERSION}" >VERSION
-
-      # Step 8: Push changes
       - name: Push changes
         run: |
           git add .
           git commit -m "Upgrading version to: $VERSION from $CURRENT_VERSION"
           git tag "$VERSION" -m "Bump to $VERSION"
-
-      # Step 9: Push the changes and tags to the remote repository.
-      # This ensures that the new version is committed and tagged in the repository.
       - name: Push
         run: |
           git push origin main
