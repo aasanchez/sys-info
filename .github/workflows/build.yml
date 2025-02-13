@@ -44,7 +44,7 @@ jobs:
         # The variables are stored in GITHUB_OUTPUT for downstream usage and a file named VARS_FILE for artifact storage.
         id: variables
         run: |
-          BUILD_DATE=$(date -u +"%Y%m%d%H%M%S")
+          BUILD_DATE=$(date -u +"%s")
           ARCH=all
           echo "BUILD_DATE: $BUILD_DATE"
           echo "ARCH: $ARCH"
