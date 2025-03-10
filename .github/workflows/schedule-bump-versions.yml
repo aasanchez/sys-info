@@ -2,7 +2,7 @@ name: Automatic Version Bumper
 on:
   workflow_dispatch:
   schedule:
-    - cron: "2 2 * * *"       # Daily: Increment patch version
+    - cron: "2 2 * * 2"       # Weekly: Increment patch version
     - cron: "2 2 2 * *"       # Monthly: Increment minor version
     - cron: "2 2 2 */2 *"     # Bi-monthly: Increment major version
 
