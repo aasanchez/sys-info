@@ -14,7 +14,7 @@ int main() {
   printf(BOLD "This is a demo package\n" RESET);
 
   printf("\n" RED);
-  printf("Version: 3.1.1");
+  printf("Version: 3.1.2");
   printf(RESET "\n");
   printf("\n");
   // Print compilation date and time
