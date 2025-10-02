@@ -16,7 +16,7 @@ jobs:
       - name: Authenticate GitHub CLI
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"git p
       - name: Get current version
         id: version
         run: |
@@ -25,7 +25,7 @@ jobs:
           echo "CURRENT_VERSION=$CURRENT_VERSION"
           echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
       - name: Calculate new Patch
-        # if: (github.event.schedule == '2 2 * * *' || github.event_name == 'workflow_dispatch')
+        if: (github.event.schedule == '2 2 * * *' || github.event_name == 'workflow_dispatch')
         run: |
           echo "CURRENT_VERSION: $CURRENT_VERSION"
 
